@@ -4,6 +4,7 @@ pipeline {
   environment {
     IMAGE_NAME = "custom-nginx"
     IMAGE_TAG  = "${BUILD_NUMBER}"
+    DOCKER_REPO = "sonalilamkhade"
   }
 
   stages {
@@ -29,11 +30,32 @@ pipeline {
         sh 'docker images | grep ${IMAGE_NAME}'
       }
     }
+
+    stage('Tag & Push Docker Image') {
+      steps {
+        withCredentials([usernamePassword(
+          credentialsId: 'dockerhub-creds',
+          usernameVariable: 'DOCKER_USER',
+          passwordVariable: 'DOCKER_PASS'
+        )]) {
+          sh '''
+            echo "Logging into Docker Hub"
+            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+
+            echo "Tagging image"
+            docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${DOCKER_REPO}/${IMAGE_NAME}:${IMAGE_TAG}
+
+            echo "Pushing image to Docker Hub"
+            docker push ${DOCKER_REPO}/${IMAGE_NAME}:${IMAGE_TAG}
+          '''
+        }
+      }
+    }
   }
 
   post {
     success {
-      echo "✅ Image built successfully: ${IMAGE_NAME}:${IMAGE_TAG}"
+      echo "✅ Image built and pushed successfully: ${DOCKER_REPO}/${IMAGE_NAME}:${IMAGE_TAG}"
     }
   }
 }
