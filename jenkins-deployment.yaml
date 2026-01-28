@@ -15,7 +15,8 @@ spec:
     spec:
       containers:
       - name: nginx-container
-        image: sonalilamkhade/custom-nginx:5
+        image: sonalilamkhade/custom-nginx:6
         ports:
         - containerPort: 80
+
 
