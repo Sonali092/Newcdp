@@ -1,0 +1,36 @@
+pipeline {
+  agent any
+
+  parameters {
+    string(
+      name: 'IMAGE_TAG',
+      defaultValue: '6',
+      description: 'Enter Docker image tag to deploy'
+    )
+  }
+
+  environment {
+    HELM_RELEASE = "new-nginx"
+    HELM_CHART   = "./deploy/Helm"
+  }
+
+  stages {
+
+    stage('Clone Repository') {
+      steps {
+        git branch: 'main',
+            url: 'https://github.com/Sonali092/Newcdp.git'
+      }
+    }
+
+    stage('Deploy using Helm') {
+      steps {
+        sh """
+          echo "Deploying image tag: ${params.imageTag}"
+          helm upgrade --install ${HELM_RELEASE} ${HELM_CHART} \
+            --set values.tag=${params.imageTag}
+        """
+      }
+    }
+  }
+}
