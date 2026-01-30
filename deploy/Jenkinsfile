@@ -26,11 +26,12 @@ pipeline {
     stage('Deploy using Helm') {
       steps {
         sh """
-          echo "Deploying image tag: ${params.imageTag}"
+          echo "Deploying image tag: ${params.IMAGE_TAG}"
           helm upgrade --install ${HELM_RELEASE} ${HELM_CHART} \
-            --set values.tag=${params.imageTag}
+            --set values.tag=${params.IMAGE_TAG}
         """
       }
     }
   }
 }
+
