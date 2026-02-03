@@ -12,46 +12,14 @@ pipeline {
   environment {
     HELM_RELEASE = "new-nginx"
     HELM_CHART   = "./deploy/Helm"
-    # Important: create a Minikube home inside Jenkins workspace
-    MINIKUBE_HOME = "${WORKSPACE}/.minikube"
-    KUBECONFIG    = "${WORKSPACE}/kubeconfig"
   }
 
   stages {
 
-    stage('Install Tools') {
+    stage('Clone Repository') {
       steps {
-        sh '''
-          # Install kubectl
-          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-          chmod +x kubectl
-          mv kubectl /usr/local/bin/
-
-          # Install Helm
-          curl -LO https://get.helm.sh/helm-v3.14.0-linux-amd64.tar.gz
-          tar -zxvf helm-v3.14.0-linux-amd64.tar.gz
-          mv linux-amd64/helm /usr/local/bin/
-
-          # Install Minikube
-          curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-          chmod +x minikube
-          mv minikube /usr/local/bin/
-        '''
-      }
-    }
-
-    stage('Start Minikube') {
-      steps {
-        sh '''
-          # Ensure no old cluster exists
-          minikube delete || true
-          # Start fresh Minikube cluster
-          minikube start --driver=docker
-          # Update kubeconfig context
-          minikube update-context
-          # Check nodes
-          kubectl get nodes
-        '''
+        git branch: 'main',
+            url: 'https://github.com/Sonali092/Newcdp.git'
       }
     }
 
@@ -65,12 +33,4 @@ pipeline {
       }
     }
   }
-
-  post {
-    always {
-      sh 'minikube delete || true'
-    }
-  }
 }
-
-
