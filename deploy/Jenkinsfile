@@ -28,7 +28,7 @@ pipeline {
         sh """
           echo "Deploying image tag: ${params.IMAGE_TAG}"
           helm upgrade --install ${HELM_RELEASE} ${HELM_CHART} \
-            --set image.tag=${params.IMAGE_TAG}
+            --set image.tag=${params.IMAGE_TAG} -n jenkins
         """
       }
     }
