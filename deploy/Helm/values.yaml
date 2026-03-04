@@ -5,7 +5,7 @@ app:
 
 image:
   repository: sonalilamkhade/custom-nginx
-  tag: "6"
+  tag: ""
   pullPolicy: IfNotPresent
 
 service:
@@ -14,7 +14,10 @@ service:
   port: 80
   targetPort: 80
 
-#ingress:
- # enabled: true
- # host: nginx.jenkins.local
-#  className: nginx  
+ingress:
+  enabled: true
+  host: nginx.jenkins.local
+  className: nginx  
+
+
+

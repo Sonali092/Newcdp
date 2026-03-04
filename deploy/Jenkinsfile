@@ -12,9 +12,20 @@ pipeline {
   environment {
     HELM_RELEASE = "new-nginx"
     HELM_CHART   = "./deploy/Helm"
+    NAMESPACE    = "jenkins"
   }
 
   stages {
+
+    stage('Validate Parameter') {
+      steps {
+        script {
+          if (!params.IMAGE_TAG?.trim()) {
+            error("IMAGE_TAG parameter is required!")
+          }
+        }
+      }
+    }
 
     stage('Clone Repository') {
       steps {
@@ -26,21 +37,22 @@ pipeline {
     stage('Deploy using Helm') {
       steps {
         sh """
+          kubectl create ns ${NAMESPACE} || true
           echo "Deploying image tag: ${params.IMAGE_TAG}"
           helm upgrade --install ${HELM_RELEASE} ${HELM_CHART} \
-            --set image.tag=${params.IMAGE_TAG} -n jenkins
+            --set image.tag=${params.IMAGE_TAG} -n ${NAMESPACE} --atomic --cleanup-on-fail
         """
       }
     }
 
     stage('Verify Deployment') {
       steps {
-        sh '''
-           kubectl get pods -n jenkins
-           kubectl get svc -n jenkins
-           kubectl get ingress -n jenkins
-           kubectl describe ingress new-nginx-ingress -n jenkins
-        '''
+        sh """
+           kubectl get pods -n ${NAMESPACE}
+           kubectl get svc -n ${NAMESPACE}
+           kubectl get ingress -n ${NAMESPACE}
+           helm status ${HELM_RELEASE} -n ${NAMESPACE}
+        """
       }
     }
 
